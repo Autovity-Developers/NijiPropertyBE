@@ -13,6 +13,7 @@ from .models import(
     BankDetail,
     NewsBlogs,
     ClientUser,
+    OTPCode,
 
 ) 
 # Register your models here.
@@ -28,4 +29,5 @@ admin.site.register(BankDetail)
 admin.site.register(NewsBlogs)
 admin.site.register(ClientUser)
 admin.site.register(UserOTP)
+admin.site.register(OTPCode)
 admin.site.register([Watchlist, Images])

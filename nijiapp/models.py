@@ -128,6 +128,14 @@ class ClientUser(models.Model):
     def __str__(self):
         return self.username
 
+#try
+
+class OTPCode(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=8, verbose_name=" Verification Code ")
+    add_time = models.DateTimeField(verbose_name=' Generation time ', auto_now_add=True)
+
+
 class UserOTP(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, default=None)
     user_verified = models.BooleanField(default=False)

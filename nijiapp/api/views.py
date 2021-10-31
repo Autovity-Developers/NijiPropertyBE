@@ -7,7 +7,7 @@ from django.http import Http404
 from django.contrib.auth.models import Group, User
 from nijiapp.models import (BankDetail, Categories, Contact, Images, Map,
                             NewsBlogs, Post, Properties, SubCategories, UserOTP,
-                            Watchlist)
+                            Watchlist, OTPCode)
 from rest_framework import (authentication, permissions, serializers, status,
                             viewsets, generics)
 from rest_framework.decorators import api_view
@@ -63,12 +63,14 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         data = super().validate(attrs)
 
         serializer = UserSerializerWithToken(self.user).data
+
         for k, v in serializer.items():
             data[k] = v
         return data
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
+    
 
 
 
@@ -696,47 +698,6 @@ def generate_otp(n):
     range_end = (10**n)-1
     return randint(range_start, range_end)
 
-
-# class VerifyCodeViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
-#     # """
-#     # Send verification code
-#     # """
-#     permission_classes = [AllowAny] # Allow everyone to register
-    
-#     serializer_class = OTPCodeSerializer # Related pre send verification logic
-#     def generate_code(self):
-
-#     # Generate 6 Digit verification code Prevent cracking
-#     # :return:
-
-#         seeds = "1234567890abcdefghijklmnopqrstuvwxyz"
-#         random_str = []
-#         for i in range(6):
-#             random_str.append(choice(seeds))
-#             return "".join(random_str)
-#     def create(self, request, *args, **kwargs):
-#         # Self defined create() The content of
-#         serializer = self.get_serializer(data=request.data)
-#         serializer.is_valid(raise_exception=True) # This step is equivalent to verifying before sending
-#         # from validated_data In order to get mobile
-#         email = serializer.validated_data["email"]
-#         # Random generation code
-#         code = self.generate_code()
-#         # Send SMS or email verification code
-#         sms_status = SendVerifyCode.send_email_code(code=code, to_email_adress=email)
-#         if sms_status == 0:
-#           # Log
-#           return Response({"msg": " Failed to send mail "}, status=status.HTTP_400_BAD_REQUEST)
-#         else:
-#             code_record = OTPCode(code=code, email=email)
-#         # Save verification code
-#             code_record.save()
-#             return Response(
-#             {"msg": f" The verification code has been sent to {email} Send complete "}, status=status.HTTP_201_CREATED
-#             )
-
-
-
 class SendOTPView(APIView):
     def get(self, request):
         code = generate_otp(6)
@@ -766,11 +727,20 @@ class SendOTPView(APIView):
 
         except:
             return Response(data={'message':'Unable to send mail'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # serializer_class = UserSerializer
 
     def post(self, request):
         user = request.user
         otp_obj = OTPCode.objects.get(user=user)
         user_submitted_otp = request.POST.get('otp_code') 
         if otp_obj.code == user_submitted_otp:
+            if UserOTP.objects.get(user="arjun").is_verified:
+                serializer = self.get_serializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                user = serializer.save()
+
             return Response(data={'message':'User verified'}, status=status.HTTP_200_OK)
         return Response(data={'message':'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
+
+      
