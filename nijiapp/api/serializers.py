@@ -1,6 +1,7 @@
 # from nijiapp.models import Properties
 from django.contrib.auth import models
 from django.contrib.auth.models import Group, User
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.query import QuerySet
 from rest_framework import serializers, validators
 from rest_framework.validators import UniqueTogetherValidator
@@ -14,6 +15,7 @@ from nijiapp.models import(
     SubCategories,
     Properties,
     Post,
+    UserOTP,
     Watchlist,
     Images,
     BankDetail,
@@ -87,7 +89,16 @@ class UserSerializerWithToken(UserSerializer):
 
     def get_token(self, obj):
         token = str(RefreshToken.for_user(obj).access_token)
-        return str(token)
+        user_qs = UserOTP.objects.filter(user=obj)
+        if user_qs.exists():
+            user_obj = user_qs.first()
+            if user_obj.user_verified:
+                return str(token)
+            else:
+                raise serializers.ValidationError("The user is not verified")
+        else:
+            raise serializers.DjangoValidationError("The user not exist")
+        
     
     def get_contact(self, obj):
         try:
