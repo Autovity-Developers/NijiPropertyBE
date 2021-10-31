@@ -1,0 +1,46 @@
+from django.urls import include, path
+from rest_framework import routers
+# from rest_framework.urlpatterns import format_suffix_patterns
+from . import views
+from .views import RegisterAPI
+
+router = routers.DefaultRouter()
+router.register(r'users', views.UserViewSet)
+router.register(r'groups', views.GroupViewSet)
+# router.register(r'properties', views.PropertyListView)
+
+# Wire up our API using automatic URL routing.
+# Additionally, we include login URLs for the browsable API.
+urlpatterns = [
+    path('', include(router.urls)),
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('api_list/', views.api_list, name='api_list'),
+    path('api_list/login/', views.MyTokenObtainPairView.as_view()),
+    path('api_list/properties/', views.PropertyListCreateView.as_view()),
+    path('api_list/properties/<int:pk>/', views.PropertyDetailView.as_view()),
+    path('api_list/prop_category/', views.CategoryListCreateView.as_view()),
+    path('api_list/prop_category/<int:pk>/', views.CategoryDetailView.as_view()),
+    path('api_list/prop_subcategory/', views.SubCategoryListCreateView.as_view()),
+    path('api_list/prop_subcategory/<int:pk>/', views.SubCategoryDetailView.as_view()),
+    path('api_list/post/', views.PostListCreateView.as_view()),
+    path('api_list/post/<int:pk>/', views.PostDetailView.as_view()),
+    path('api_list/contact/', views.ContactListCreateView.as_view()),
+    path('api_list/contact/<int:pk>/', views.ContactDetailView.as_view()),
+    path('api_list/map/', views.MapListCreateView.as_view()),
+    path('api_list/map/<int:pk>/', views.MapDetailView.as_view()),
+    path('api_list/bank/', views.BankListCreateView.as_view()),
+    path('api_list/bank/<int:pk>/', views.BankDetailView.as_view()),
+    path('api_list/newsblogs/', views.NewsBlogsListCreateView.as_view()),
+    path('api_list/newsblogs/<int:pk>/', views.NewsBlogsDetailView.as_view()),
+    path('api_list/images/', views.ImagesListCreateView.as_view()),
+    path('api_list/images/<int:pk>/', views.ImagesDetailView.as_view()),
+    path('api_list/watchlist/', views.WatchListCreateView.as_view()),
+    path('api_list/watchlist/<int:pk>/', views.WatchlistDetailView.as_view()),
+    
+    path('api_list/register/', RegisterAPI.as_view(), name='register'),
+    path('api_list/otp/', views.SendOTPView.as_view()),
+    path('api_list/otp-verify/', views.VerifyOTPView.as_view()),
+]
+
+# urlpatterns = format_suffix_patterns(urlpatterns)
+

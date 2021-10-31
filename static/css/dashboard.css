@@ -1,0 +1,50 @@
+.carousel-inner .carousel-item{
+        height: 60vh !important;
+        background:#000;
+    }
+    
+.banner{
+	height: 60vh;
+	background-position: center;
+    background-attachment: cover;
+  
+}
+.carousel-caption{
+    display: block !important;
+    top:40%;
+}
+.carousel-caption h3{
+    font-size: 50px;
+    letter-spacing: 2px;
+    color:  #efeef1;
+}
+    
+@media (min-width: 0px) and (max-width: 768px) {
+    
+    .carousel-inner .carousel-item{
+        height: 40vh !important;
+        background:#000;
+    }
+    
+    .banner{
+        height: 40vh;
+        background-position: center;
+        background-attachment: cover;
+    
+    }
+
+    .carousel-caption{
+        top: 10%;
+        left:10%;
+        display: block !important;
+      }
+      
+    .carousel-caption h3{
+        font-size: 28px;
+        letter-spacing: 2px;
+      }
+
+
+    
+}
+    

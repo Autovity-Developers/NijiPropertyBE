@@ -1,0 +1,34 @@
+from django.contrib import admin
+from .models import(
+
+    Contact,
+    Map,
+    Categories,
+    OTPCode,
+    SubCategories,
+    Properties,
+    Post,
+    UserOTP,
+    Watchlist,
+    Images,
+    BankDetail,
+    NewsBlogs,
+    ClientUser,
+
+) 
+# Register your models here.
+
+admin.site.register(Contact)
+
+admin.site.register(Map)
+admin.site.register(Categories)
+admin.site.register(SubCategories)
+admin.site.register(Properties)
+admin.site.register(Post)
+# admin.site.register(Watchlist)
+# admin.site.register(Images)
+admin.site.register(BankDetail)
+admin.site.register(NewsBlogs)
+admin.site.register(ClientUser)
+admin.site.register(UserOTP)
+admin.site.register([Watchlist, Images])

@@ -1,0 +1,316 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: sans-serif;
+}
+
+.jumbotron {    
+    margin:0 !important;
+    padding:0 !important;
+    width:100% !important;
+}
+
+.sidebar {
+    background-color: #2a3f54;
+    height:100vh;
+}
+
+#company-title {
+    color:rgb(228, 222, 222);
+    font-size: 22px;
+    font-weight: 600;
+    transition: all 0.5s ease-in-out;
+    
+}
+
+#company-title:hover {
+    text-decoration: none;
+    color:#fff;
+}
+
+.nav-item {
+    margin-left: 30px;
+    margin-top: 25px;
+    transition: all 0.5s ease-in-out;
+    font-size: 16px;
+}
+
+.nav-item:last-child{
+    margin-bottom: 30px !important;
+}
+
+
+.nav-item  a{
+    color:#fff;
+
+}
+
+.nav-item > a {
+    font-size: 17px;
+    font-weight: 500;
+}
+
+.nav-item > a > i{
+    margin-right: 9px;
+    transition: all 0.7s;
+}
+
+.nav-item:hover a, .nav-item:hover a i {
+    color:rgb(207, 203, 203);
+}
+
+
+.user-config {
+    margin:0;
+    padding:0 !important;
+    background-color: #e4e2e2;    
+    display:flex !important;
+    justify-content: flex-end !important;
+    flex-direction: row;
+    flex-wrap: wrap;
+    font-size: 13px !important;
+}  
+
+.user-options {
+    display:flex;
+    justify-content: flex-end;
+    flex-direction: row;
+    padding-right: 20px;
+}
+
+.user-links a{
+    text-decoration: none;
+    color:rgb(93, 92, 92);
+    transition: all 0.6s ease-in-out;
+    /* padding: 5px 0 !important; */
+} 
+
+/* .user-links a:hover {
+    text-decoration: none;
+    border-bottom: 1px solid rgb(90, 90, 226);
+} */
+
+
+
+
+.img-responsive {
+    width: 100%;
+}
+
+
+.countries {
+    display:flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    flex-direction: row;
+
+}
+
+.countries .country-item {
+    margin-left:14px;
+    position: relative;
+    overflow: hidden;
+    margin:0 !important;
+    padding-right: 16px;
+    
+}
+
+.countries .country-item img {
+    width: 17vw;
+    height:21vh;   
+}
+
+
+.countries .country-item p {
+    position: absolute;
+    top:36%;
+    left:35%;
+    color:#fff;
+    font-weight: 600;
+}
+
+
+
+
+/*CSS for  destinations/update.html */
+.destination-heading {
+    display:flex;
+    justify-content: flex-end;
+    flex-direction: row;
+    align-items: baseline;
+    
+}
+
+/* end of CSS for destinations/update.html */
+
+
+.review-container {
+    width:100% !important;
+    margin:0;
+    padding:0;
+}
+
+.seperator {
+    font-size:20px !important;
+    margin:0 2px;
+}
+
+.review-title {
+    text-decoration: none;
+    color:rgb(27, 27, 27) !important;
+    
+}
+
+.review-title:hover {
+    text-decoration: none;
+}
+
+
+.message-container {
+    width:100% !important;
+}
+
+.create-reviews {
+    width: 100% !important;
+}
+
+
+.btn-menu{
+    border:none;
+    background:transparent;
+    font-size: 16px;
+    text-align: left;
+    margin-left: 20px;
+    display:none;
+}
+
+/* Packages */
+
+.package-selector {
+    display:flex;
+    justify-content: space-between;
+    flex-direction: row;
+}
+
+
+/* Packages ends */
+@media (max-width: 768px) {
+    .sidebar {
+        display:none;
+    }
+
+    .user-config {
+        width:100% !important;
+        margin:0 !important;
+        display:flex;
+        justify-content: space-between !important;
+        font-size: 12px !important;
+        text-transform: capitalize;
+    }
+
+    .row.pt-4.pb-4.content{
+        width:100%;
+        margin-left: 0;
+    }
+
+    .col-md-9.col-xl-9 {
+        width:100%;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    #company-title {
+        font-size: 18px;
+    }
+
+    .nav-item {
+        margin-left: 17px;
+        margin-top: 25px;
+        transition: all 0.7s ease-in-out;
+    }
+
+    .nav-item > a {
+        font-weight: 600;
+    }
+
+    .hide-on-less {
+        display:none !important;
+    }
+
+    .btn-menu {
+        display:block;
+    }
+
+    .btn-add {
+        font-size:11px !important;
+    }
+
+    h3{
+        font-size:17px !important;
+        font-weight: 500;
+    }
+   
+    h4, h5 {
+        font-size: 15px !important;
+        font-weight: normal;
+    }
+
+    .name-of-reviewer {
+        font-weight: 500;
+        font-size: 13px !important;
+    }
+
+    .outer-container {
+        display:flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        flex-wrap: wrap;
+    }
+
+    .countries {
+        display:flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    .country-item img{
+        width:26vh !important;
+    }
+
+
+
+    .c-container .row h4 {
+        padding-left: 20px;      
+    }
+
+    .country-item {
+        padding-left: 20px;
+    }
+    .country-item p {
+        left:38%;
+    }
+}
+
+#manageUI {
+    transition: all 0.7s ease-in-out;
+}
+
+
+
+#uiItems {
+    display:none;
+    margin-left: 10px;
+    justify-content: center;
+    flex-direction: column;
+    flex-wrap: wrap;
+
+    
+}
+
+
