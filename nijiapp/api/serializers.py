@@ -163,18 +163,4 @@ class RegisterClientSerializer(serializers.ModelSerializer):
         return user
 
 
-#try 
-
-# class OTPCodeSerializer(serializers.Serializer):
-#     email = serializers.EmailField(required=True)
-    
-#     def validate_email(self, email):
-#         if User.objects.filter(email=email).count():
-#             raise serializers.ValidationError('This email has been registered')
-#         if not re.match(EMAIL_REGAX, email):
-#             raise serializers.ValidationError('Mailbox format error')
-#         one_minute_age = datetime.now() - timedelta(hours=0, minutes=1, seconds=0)
-#         if OTPCode.objects.filter(add_time__gt=one_minute_age, email=email).count():
-#             raise serializers.ValidationError('Please send again in a minute')
-#         return email
 

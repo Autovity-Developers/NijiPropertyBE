@@ -4,7 +4,6 @@ from .models import(
     Contact,
     Map,
     Categories,
-    OTPCode,
     SubCategories,
     Properties,
     Post,
@@ -25,8 +24,6 @@ admin.site.register(Categories)
 admin.site.register(SubCategories)
 admin.site.register(Properties)
 admin.site.register(Post)
-# admin.site.register(Watchlist)
-# admin.site.register(Images)
 admin.site.register(BankDetail)
 admin.site.register(NewsBlogs)
 admin.site.register(ClientUser)

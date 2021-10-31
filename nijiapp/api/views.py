@@ -6,7 +6,7 @@ import rest_framework
 from django.http import Http404
 from django.contrib.auth.models import Group, User
 from nijiapp.models import (BankDetail, Categories, Contact, Images, Map,
-                            NewsBlogs, OTPCode, Post, Properties, SubCategories, UserOTP,
+                            NewsBlogs, Post, Properties, SubCategories, UserOTP,
                             Watchlist)
 from rest_framework import (authentication, permissions, serializers, status,
                             viewsets, generics)
@@ -686,9 +686,9 @@ class VerifyOTPView(APIView):
             return Response(data={"message":"server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-from rest_framework.response import Response
-from rest_framework.views import status
-from rest_framework import mixins, viewsets
+# from rest_framework.response import Response
+# from rest_framework.views import status
+# from rest_framework import mixins, viewsets
 from random import randint
 
 def generate_otp(n):
