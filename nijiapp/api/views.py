@@ -5,8 +5,8 @@ from django.db.models.manager import BaseManager
 import rest_framework
 from django.http import Http404
 from django.contrib.auth.models import Group, User
-from nijiapp.models import (BankDetail, Categories, Contact, Images, Map,
-                            NewsBlogs, Post, Properties, SubCategories, UserOTP,
+from nijiapp.models import (BankDetail, Contact, Images, Map,
+                            NewsBlogs, Post, Properties, PropertyType, UserOTP,
                             Watchlist, OTPCode)
 from rest_framework import (authentication, permissions, serializers, status,
                             viewsets, generics)
@@ -19,23 +19,25 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from django.core.paginator import Paginator
 from django.core.mail import send_mail
 
-from .serializers import (ContactSerializer, GroupSerializer, PostSerializer, PropertiesSerializer,  CategoriesSerializer,
-                           SubCategoriesSerializer, UserSerializer, UserSerializerWithToken, MapSerializer, 
+from .serializers import (ContactSerializer, GroupSerializer, PostSerializer, PropertiesSerializer,
+                           PropertyTypeSerializer, UserSerializer, UserSerializerWithToken, MapSerializer, 
                            BankDetailSerializer, NewsBlogsSerializer, ImagesSerializer, WatchListSerializer,
                            ClientUserSerializer, RegisterClientSerializer, )
 
 from nijiapp.otp_helper import send_otp,verify_otp
+from rest_framework.permissions import AllowAny
 
 @api_view(['GET'])
+# @permission_classes((AllowAny, ))
 def api_list(request):
     objs = {
         'login': '/api/api_list/login',
         'properties': '/api/api_list/properties',
         'properties_detail_update_retrive': '/api/api_list/properties/<int:pk>/',
-        'prop_category': '/api/api_list/prop_category',
-        'prop_category_detail_update_retrive': '/api/api_list/prop_category/<int:pk>/',
-        'prop_subcategory': '/api/api_list/prop_subcategory',
-        'prop_subcategory_detail_update_retrive': '/api/api_list/prop_subcategory/<int:pk>/',
+        'property_type': '/api/api_list/property_type',
+        'property_type_detail_update_retrive': '/api/api_list/property_type/<int:pk>/',
+        # 'prop_subcategory': '/api/api_list/prop_subcategory',
+        # 'prop_subcategory_detail_update_retrive': '/api/api_list/prop_subcategory/<int:pk>/',
         'post':'/api/api_list/post',
         'post_detail_update_retrive': '/api/api_list/post/<int:pk>/',
         'contact':'/api/api_list/contact',
@@ -78,9 +80,11 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
     """
+    
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAdminUser]
 
 
 class GroupViewSet(viewsets.ModelViewSet):
@@ -102,6 +106,11 @@ def check_editor_group(request):
         return True
     return False
 
+def check_clientuser_group(request):
+    if request.user.groups.filter(name='client user').exists():
+        return True
+    return False
+
 def check_mod_group(request):
     if request.user.groups.filter(name='mod').exists():
         return True
@@ -110,14 +119,13 @@ def check_mod_group(request):
 class PropertyListCreateView(APIView):
     # permission_classes = [permissions.IsAuthenticated]
     # permission_classes = [permissions.IsAdminUser]
-
-
-    def get(self, request, format=None):
+   
+    def get(self, request):
         property_list = Properties.objects.all().order_by('id')
         page_number = self.request.query_params.get('page_number ', 1)
         page_size = self.request.query_params.get('page_size ', 6)
         paginator = Paginator(property_list , page_size)
-        serializer = PropertiesSerializer(paginator.page(page_number) , many=True, context={'request':request})
+        serializer = PropertiesSerializer(paginator.page(page_number) , many=True, context={'request':self.request})
         return Response(serializer.data)
     
     def post(self, request, format=None):
@@ -128,19 +136,29 @@ class PropertyListCreateView(APIView):
                     return Response({'error':True, 'message':'A property with same name already exists'}, status=status.HTTP_400_BAD_REQUEST)
                 map = Map.objects.get(pk=req.get('map'))
                 
-                category = Categories.objects.get(pk=req.get('category'))
-                subcategory = SubCategories.objects.get(pk=req.get('subcategory'))
+                property_type = PropertyType.objects.get(pk=req.get('property_type'))
+                # subcategory = SubCategories.objects.get(pk=req.get('subcategory'))
                 property = Properties(
                     title = req.get('title'),
                     address = req.get('address'),
                     price = req.get('price'),
-                    facilities = req.get('facilities'),
+                    # facilities = req.get('facilities'),
                     amenities = req.get('amenities'),
                     landmarks = req.get('landmarks'),
                     map = map,
-                    category = category,
-                    subcategory= subcategory,
+                    property = req.get('property'),
+                    property_type = property_type,
                     user = request.user,
+                    thumbnail = req.get('thumbnail'),
+                    descriptions = req.get('descriptions'),
+                    bedrooms = req.get('bedrooms'),
+                    bathroom = req.get('bathroom'),
+                    parking = req.get('parking'),
+                    kitchen = req.get('kitchen'),
+                    floors = req.get('floors'),
+                    builtup_area = req.get('builtup_area'),
+                    road_access = req.get('road_access'),
+
                 )
                 property.save()
                 serializer = PropertiesSerializer(property, many=False)
@@ -159,20 +177,20 @@ class PropertyDetailView(APIView):
     # permission_classes = [permissions.IsAdminUser]
 
     
-    def get_object(self, pk):
+    def get_object(self, title):
         try:
-            return Properties.objects.get(pk=pk)
+            return Properties.objects.get(title=title)
         except Properties.DoesNotExist:
             raise Http404
     
-    def get(self, request, pk, format=None):
-        property = self.get_object(pk)
+    def get(self, request, title, format=None):
+        property = self.get_object(title)
         serializer = PropertiesSerializer(property)
         return Response(serializer.data)
 
-    def put(self, request, pk, format=None):
+    def put(self, request, title, format=None):
         if check_agent_group(request) or check_editor_group(request):
-            property = self.get_object(pk)
+            property = self.get_object(title)
             serializer = PropertiesSerializer(property, data=request.data)
             if serializer.is_valid():
                 serializer.save()
@@ -181,24 +199,26 @@ class PropertyDetailView(APIView):
         else:
            return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     
-    def delete(self, request, pk, format=None):
+    def delete(self, request, title, format=None):
         if check_agent_group(request) or check_editor_group(request):
-            property = self.get_object(pk)
+            property = self.get_object(title)
             property.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
            return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-class CategoryListCreateView(APIView):
+class PropertyTypeListCreateView(APIView):
+
+    # permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, format=None):
-        prop_cat = Categories.objects.all()
-        serializer = CategoriesSerializer(prop_cat, many=True)
+        prop_type = PropertyType.objects.all()
+        serializer = PropertyTypeSerializer(prop_type, many=True)
         return Response(serializer.data)
     
     def post(self, request, format=None):
         if check_agent_group(request) or check_editor_group(request):   
-            serializer =  CategoriesSerializer(data=request.data)
+            serializer =  PropertyTypeSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -207,23 +227,25 @@ class CategoryListCreateView(APIView):
            return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-class CategoryDetailView(APIView):
+class PropertyTypeDetailView(APIView):
 
-    def get_object(self, pk):
+    # permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self, type):
         try:
-            return Categories.objects.get(pk=pk)
-        except Categories.DoesNotExist:
+            return PropertyType.objects.get(type=type)
+        except PropertyType.DoesNotExist:
             raise Http404
     
-    def get(self, request, pk, format=None):
-        prop_cat = self.get_object(pk)
-        serializer = CategoriesSerializer(prop_cat)
+    def get(self, request, type, format=None):
+        prop_type = self.get_object(type)
+        serializer = PropertyTypeSerializer(prop_type)
         return Response(serializer.data)
     
-    def put(self, request, pk, format=None):
+    def put(self, request, type, format=None):
         if check_agent_group(request) or check_editor_group(request):
-            prop_cat = self.get_object(pk)
-            serializer = CategoriesSerializer(prop_cat, data=request.data)
+            prop_type = self.get_object(type)
+            serializer = PropertyTypeSerializer(prop_type, data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data)
@@ -231,67 +253,69 @@ class CategoryDetailView(APIView):
         else:
            return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     
-    def delete(self, request, pk, format=None):
+    def delete(self, request, type, format=None):
         if check_agent_group(request) or check_editor_group(request):
-            prop_cat = self.get_object(pk)
-            prop_cat.delete()
+            prop_type = self.get_object(type)
+            prop_type.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
            return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-class SubCategoryListCreateView(APIView):
+# class SubCategoryListCreateView(APIView):
 
-    def get(self, request, format=None):
-        prop_subcat =SubCategories.objects.all()
-        serializer = SubCategoriesSerializer(prop_subcat, many=True)
-        return Response(serializer.data)
+#     def get(self, request, format=None):
+#         prop_subcat =SubCategories.objects.all()
+#         serializer = SubCategoriesSerializer(prop_subcat, many=True)
+#         return Response(serializer.data)
     
-    def post(self, request, format=None):
-        if check_agent_group(request) or check_editor_group(request):
-            serializer =  SubCategoriesSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        else:
-           return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+#     def post(self, request, format=None):
+#         if check_agent_group(request) or check_editor_group(request):
+#             serializer =  SubCategoriesSerializer(data=request.data)
+#             if serializer.is_valid():
+#                 serializer.save()
+#                 return Response(serializer.data, status=status.HTTP_201_CREATED)
+#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         else:
+#            return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-class SubCategoryDetailView(APIView):
+# class SubCategoryDetailView(APIView):
 
-    def get_object(self, pk):
-        try:
-            return SubCategories.objects.get(pk=pk)
-        except SubCategories.DoesNotExist:
-            raise Http404
+#     def get_object(self, pk):
+#         try:
+#             return SubCategories.objects.get(pk=pk)
+#         except SubCategories.DoesNotExist:
+#             raise Http404
     
-    def get(self, request, pk, format=None):
-        prop_subcat = self.get_object(pk)
-        serializer = SubCategoriesSerializer(prop_subcat)
-        return Response(serializer.data)
+#     def get(self, request, pk, format=None):
+#         prop_subcat = self.get_object(pk)
+#         serializer = SubCategoriesSerializer(prop_subcat)
+#         return Response(serializer.data)
     
-    def put(self, request, pk, format=None):
-        if check_agent_group(request) or check_editor_group(request):
-            prop_subcat = self.get_object(pk)
-            serializer = SubCategoriesSerializer(prop_subcat, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        else:
-           return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+#     def put(self, request, pk, format=None):
+#         if check_agent_group(request) or check_editor_group(request):
+#             prop_subcat = self.get_object(pk)
+#             serializer = SubCategoriesSerializer(prop_subcat, data=request.data)
+#             if serializer.is_valid():
+#                 serializer.save()
+#                 return Response(serializer.data)
+#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         else:
+#            return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
     
-    def delete(self, request, pk, format=None):
-        if check_editor_group(request) or check_agent_group(request):
-            prop_subcat = self.get_object(pk)
-            prop_subcat.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        else:
-           return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+#     def delete(self, request, pk, format=None):
+#         if check_editor_group(request) or check_agent_group(request):
+#             prop_subcat = self.get_object(pk)
+#             prop_subcat.delete()
+#             return Response(status=status.HTTP_204_NO_CONTENT)
+#         else:
+#            return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 
 class PostListCreateView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAdminUser]
 
     def get(self, request, format=None):
         post = Post.objects.all()
@@ -311,6 +335,8 @@ class PostListCreateView(APIView):
 
 
 class PostDetailView(APIView):
+
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self, pk):
         try:
@@ -345,6 +371,8 @@ class PostDetailView(APIView):
 
 class ContactListCreateView(APIView):
    
+    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request, format=None):
         contact = Contact.objects.all()
         serializer = ContactSerializer(contact, many=True)
@@ -362,6 +390,8 @@ class ContactListCreateView(APIView):
 
 class ContactDetailView(APIView):
     
+    permission_classes = [permissions.IsAuthenticated]
+
     def get_object(self, pk):
         try:
             return Contact.objects.get(pk=pk)
@@ -395,6 +425,8 @@ class ContactDetailView(APIView):
 
 class MapListCreateView(APIView):
 
+    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request, format=None):
         map = Map.objects.all()
         serializer = MapSerializer(map, many=True)
@@ -411,6 +443,8 @@ class MapListCreateView(APIView):
            return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 class MapDetailView(APIView):
+
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self, pk):
         try:
@@ -445,6 +479,8 @@ class MapDetailView(APIView):
 
 class BankListCreateView(APIView):
 
+    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request, format=None):
         bank = BankDetail.objects.all()
         serializer = BankDetailSerializer(bank, many=True)
@@ -461,6 +497,8 @@ class BankListCreateView(APIView):
            return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 class BankDetailView(APIView):
+
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self, pk):
         try:
@@ -496,6 +534,8 @@ class BankDetailView(APIView):
 
 class NewsBlogsListCreateView(APIView):
 
+    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request, format=None):
         newsblog = NewsBlogs.objects.all()
         serializer = NewsBlogsSerializer(newsblog, many=True)
@@ -512,6 +552,8 @@ class NewsBlogsListCreateView(APIView):
            return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 class NewsBlogsDetailView(APIView):
+
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self, pk):
         try:
@@ -547,6 +589,8 @@ class NewsBlogsDetailView(APIView):
 
 class ImagesListCreateView(APIView):
 
+    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request, format=None):
         image = Images.objects.all()
         serializer = ImagesSerializer(image, many=True)
@@ -564,6 +608,8 @@ class ImagesListCreateView(APIView):
 
 class ImagesDetailView(APIView):
 
+    permission_classes = [permissions.IsAuthenticated]
+
     def get_object(self, pk):
         try:
             return Images.objects.get(pk=pk)
@@ -573,7 +619,7 @@ class ImagesDetailView(APIView):
 
     def get(self, request, pk, format=None):
         image = self.get_object(pk)
-        serializer = ImagesSerializer(image)
+        serializer = ImagesSerializer(image, many=True)
         return Response(serializer.data)
 
     def put(self, request, pk, format=None):
@@ -598,13 +644,15 @@ class ImagesDetailView(APIView):
 
 class WatchListCreateView(APIView):
 
+    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request, format=None):
         watchlist = Watchlist.objects.all()
         serializer = WatchListSerializer(watchlist, many=True)
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        if check_editor_group(request):
+        if check_clientuser_group(request):
             serializer = WatchListSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
@@ -614,6 +662,8 @@ class WatchListCreateView(APIView):
            return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 class WatchlistDetailView(APIView):
+
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self, pk):
         try:
@@ -628,18 +678,18 @@ class WatchlistDetailView(APIView):
         return Response(serializer.data)
 
     def put(self, request, pk, format=None):
-        if check_editor_group(request):
+        # if check_editor_group(request):
             watchlist = self.get_object(pk)
             serializer = WatchListSerializer(watchlist, data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        else:
-           return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        # else:
+        #    return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def delete(self, request, pk, format=None):
-        if check_editor_group(request):
+        if check_clientuser_group(request):
             watchlist = self.get_object(pk)
             watchlist.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -735,10 +785,10 @@ class SendOTPView(APIView):
         otp_obj = OTPCode.objects.get(user=user)
         user_submitted_otp = request.POST.get('otp_code') 
         if otp_obj.code == user_submitted_otp:
-            if UserOTP.objects.get(user="arjun").is_verified:
-                serializer = self.get_serializer(data=request.data)
-                serializer.is_valid(raise_exception=True)
-                user = serializer.save()
+            # if UserOTP.objects.get(user="arjun").is_verified:
+            #     serializer = self.get_serializer(data=request.data)
+            #     serializer.is_valid(raise_exception=True)
+            #     user = serializer.save()
 
             return Response(data={'message':'User verified'}, status=status.HTTP_200_OK)
         return Response(data={'message':'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)

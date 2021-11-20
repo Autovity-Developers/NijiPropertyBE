@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import Group, User
+import datetime 
+# now = str(datetime.datetime)
 
 # Create your models here.
 # class UserType(models.Model):
@@ -36,25 +38,36 @@ class Contact(models.Model):
 #         return self.username
 
 class Map(models.Model):
-    property_title = models.CharField(max_length=100, blank=True, null=True)
+    # property_title = models.CharField(max_length=100, blank=True, null=True)
     longitude = models.DecimalField(max_digits=100, decimal_places=50)
     latitude = models.DecimalField(max_digits=100, decimal_places=50)
 
+    # def __str__(self):
+    #     return self.property_title
+
+# class Categories(models.Model):
+#     title = models.CharField(max_length=200, blank=True, null=True)
+
+#     def __str__(self):
+#         return self.title
+
+# class SubCategories(models.Model):
+#     title = models.CharField(max_length=200, blank=True, null=True)
+#     category = models.ForeignKey(Categories, on_delete=models.CASCADE)
+
+#     def __str__(self):
+#         return self.title
+
+class PropertyType(models.Model):
+    property_type = models.CharField(max_length=100, primary_key=True)
+
     def __str__(self):
-        return self.property_title
+        return str(self.property_type)
+    
+    def __repr__(self):
+        return self.property_type
+    
 
-class Categories(models.Model):
-    title = models.CharField(max_length=200, blank=True, null=True)
-
-    def __str__(self):
-        return self.title
-
-class SubCategories(models.Model):
-    title = models.CharField(max_length=200, blank=True, null=True)
-    category = models.ForeignKey(Categories, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.title
 
 property_choices = {
     ('Buy', 'buy'),
@@ -64,15 +77,29 @@ class Properties(models.Model):
     title = models.CharField(max_length=200, default='', null=True)
     address = models.CharField(max_length=200, null=True)
     price = models.IntegerField(blank=True, null=True)
-    facilities = models.CharField(max_length=200, blank=True, null=True)
+    # facilities = models.CharField(max_length=200, blank=True, null=True)#remove
     amenities = models.CharField(max_length=200, null=True, blank=True)
     landmarks = models.CharField(max_length=200, null=True, blank=True)
     map = models.ForeignKey(Map, on_delete=models.CASCADE)
-    # post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    property = models.CharField(max_length=100, choices=property_choices)    
-    category = models.ForeignKey(Categories, on_delete=models.CASCADE)
-    subcategory = models.ForeignKey(SubCategories, on_delete=models.CASCADE, null=True, blank=True)
+    property = models.CharField(max_length=100, choices=property_choices) 
+    property_type = models.ForeignKey(PropertyType, on_delete=models.CASCADE)   
+    # category = models.ForeignKey(Categories, on_delete=models.CASCADE)
+    # subcategory = models.ForeignKey(SubCategories, on_delete=models.CASCADE, null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    thumbnail = models.ImageField(upload_to='Image_Gallery/thumbnail')
+    descriptions = models.CharField(max_length=500, null=True, blank=True)
+    bedrooms = models.IntegerField()
+    bathroom = models.IntegerField()
+    parking = models.CharField(max_length=100, null=True, blank=True)
+    kitchen = models.IntegerField()
+    floors = models.IntegerField()
+    builtup_area = models.CharField(max_length=100, null=True, blank=True)
+    road_access = models.CharField(max_length=100, null=True, blank=True)
+
+    # @property
+    # def property_type_test(self):
+    #     return self.property_type
+    
 
     def __str__(self):
         return self.title
@@ -99,7 +126,11 @@ class Images(models.Model):
     property = models.ForeignKey(Properties, on_delete=models.CASCADE)
 
     def __str__(self):
-        return str(self.property)
+        return self.property.title
+
+    def delete(self, *args, **kwargs):
+        self.image_url.delete()
+        super().delete(*args, **kwargs)
 
 class BankDetail(models.Model):
     bank_name = models.CharField(max_length=100, null=False, blank=False)
@@ -124,6 +155,7 @@ class ClientUser(models.Model):
     username = models.CharField(max_length=100, null=True, blank=True)
     email = models.EmailField()
     password = models.CharField(max_length=100, blank=True, null=True)
+    position = models.CharField(max_length=254, null=True, blank=True)
 
     def __str__(self):
         return self.username
@@ -148,4 +180,10 @@ class UserOTP(models.Model):
         return self.user.username
 
 
+# class SubscribeUser(models.Model):
+#     username = models.CharField(max_length=100, null=True, blank=True)
+#     email = models.EmailField()
+
+#     def __str__(self):
+#         return self.username
 

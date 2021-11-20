@@ -3,9 +3,8 @@ from .models import(
 
     Contact,
     Map,
-    Categories,
-    SubCategories,
     Properties,
+    PropertyType,
     Post,
     UserOTP,
     Watchlist,
@@ -21,12 +20,13 @@ from .models import(
 admin.site.register(Contact)
 
 admin.site.register(Map)
-admin.site.register(Categories)
-admin.site.register(SubCategories)
+# admin.site.register(Categories)
+# admin.site.register(SubCategories)
 admin.site.register(Properties)
+admin.site.register(PropertyType)
 admin.site.register(Post)
 admin.site.register(BankDetail)
-admin.site.register(NewsBlogs)
+# admin.site.register(NewsBlogs) puased
 admin.site.register(ClientUser)
 admin.site.register(UserOTP)
 admin.site.register(OTPCode)
