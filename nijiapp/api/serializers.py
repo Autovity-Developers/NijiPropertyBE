@@ -121,7 +121,7 @@ class ImagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Images
         # fields = '__all__'
-        fields = ['id', 'image_url']
+        fields = ['image_url']
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -141,26 +141,25 @@ class PropertyTypeSerializer(serializers.ModelSerializer):
 
 class PropertiesSerializer(serializers.ModelSerializer):
     # images =serializers.SerializerMethodField()
+    user = serializers.ReadOnlyField(source='user.username')
+    images = ImagesSerializer(source='images_set', many=True, read_only=True)
+    # post = PostSerializer(source='post', many=)
 
     class Meta:
         model = Properties
         fields = ['id', 'title', 'address', 'price', 'amenities', 'landmarks', 'map', 'property', 'user', 'thumbnail',
-                  'descriptions', 'bedrooms', 'bathroom', 'parking', 'kitchen', 'floors', 'builtup_area', 'road_access', 'property_type'
-                  ]
+                  'descriptions', 'bedrooms', 'bathroom', 'parking', 'kitchen', 'floors', 'builtup_area', 'road_access', 'property_type',
+                    'images']
+        
+        
+        def create(self, validated_data):
+            images_data = self.context.get('view').request.FILES
+            property = Properties.objects.create(title=validated_data.get('title', 'no-title'),
+                                    user_id=1)
+            for image_data in images_data.values():
+                Images.objects.create(property=property, image=image_data)
+            return property
 
-        # def get_images(self, property):
-        #     images = property.images.all()
-        #     return ImagesSerializer(images, many=True).data
-
-        # def get_post(self, property):
-        #     return PostSerializer(property.property, many=True).data
-        #     # post = property.post.all()
-        # return PostSerializer(post, many=True).data
-
-# class SubCategoriesSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = SubCategories
-#         fields = '__all__'
 
 
 class MapSerializer(serializers.ModelSerializer):

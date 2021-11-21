@@ -33,9 +33,9 @@ def api_list(request):
     objs = {
         'login': '/api/api_list/login',
         'properties': '/api/api_list/properties',
-        'properties_detail_update_retrive': '/api/api_list/properties/<int:pk>/',
-        'property_type': '/api/api_list/property_type',
-        'property_type_detail_update_retrive': '/api/api_list/property_type/<int:pk>/',
+        'properties_detail_update_retrive': '/api/api_list/properties/<str:title>/',
+        # 'property_type': '/api/api_list/property_type',
+        # 'property_type_detail_update_retrive': '/api/api_list/property_type/<str:title>/',
         # 'prop_subcategory': '/api/api_list/prop_subcategory',
         # 'prop_subcategory_detail_update_retrive': '/api/api_list/prop_subcategory/<int:pk>/',
         'post':'/api/api_list/post',
@@ -46,12 +46,12 @@ def api_list(request):
         'map_detail_update_retrive': '/api/api_list/map/<int:pk>/',
         'bank':'/api/api_list/bank',
         'bank_detail_update_retrive': '/api/api_list/bank/<int:pk>/',
-        'images':'/api/api_list/images',
-        'images_detail_update_retrive': '/api/api_list/images/<int:pk>/',
+        # 'images':'/api/api_list/images',
+        # 'images_detail_update_retrive': '/api/api_list/images/<int:pk>/',
         'wathlist':'/api/api_list/watchlist',
         'watchlist_detail_update_retrive': '/api/api_list/watchlist/<int:pk>/',
-        'register': '/api/api_list/register/',
-        'otp': '/api/api_list/otp/',
+        # 'register': '/api/api_list/register/',
+        # 'otp': '/api/api_list/otp/',
         
         
 
@@ -106,8 +106,8 @@ def check_editor_group(request):
         return True
     return False
 
-def check_clientuser_group(request):
-    if request.user.groups.filter(name='client user').exists():
+def check_user_group(request):
+    if request.user.groups.filter(name='users').exists():
         return True
     return False
 
@@ -233,7 +233,7 @@ class PropertyTypeDetailView(APIView):
 
     def get_object(self, type):
         try:
-            return PropertyType.objects.get(type=type)
+            return PropertyType.objects.get(property_type=type)
         except PropertyType.DoesNotExist:
             raise Http404
     
@@ -314,7 +314,7 @@ class PropertyTypeDetailView(APIView):
 
 
 class PostListCreateView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
     # permission_classes = [permissions.IsAdminUser]
 
     def get(self, request, format=None):
@@ -444,7 +444,7 @@ class MapListCreateView(APIView):
 
 class MapDetailView(APIView):
 
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self, pk):
         try:
@@ -479,7 +479,7 @@ class MapDetailView(APIView):
 
 class BankListCreateView(APIView):
 
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, format=None):
         bank = BankDetail.objects.all()
@@ -498,7 +498,7 @@ class BankListCreateView(APIView):
 
 class BankDetailView(APIView):
 
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self, pk):
         try:
@@ -534,7 +534,7 @@ class BankDetailView(APIView):
 
 class NewsBlogsListCreateView(APIView):
 
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, format=None):
         newsblog = NewsBlogs.objects.all()
@@ -553,7 +553,7 @@ class NewsBlogsListCreateView(APIView):
 
 class NewsBlogsDetailView(APIView):
 
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self, pk):
         try:
@@ -589,7 +589,7 @@ class NewsBlogsDetailView(APIView):
 
 class ImagesListCreateView(APIView):
 
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, format=None):
         image = Images.objects.all()
@@ -608,7 +608,7 @@ class ImagesListCreateView(APIView):
 
 class ImagesDetailView(APIView):
 
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self, pk):
         try:
@@ -644,7 +644,7 @@ class ImagesDetailView(APIView):
 
 class WatchListCreateView(APIView):
 
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, format=None):
         watchlist = Watchlist.objects.all()
@@ -652,7 +652,7 @@ class WatchListCreateView(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        if check_clientuser_group(request):
+        if check_user_group(request):
             serializer = WatchListSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
@@ -663,7 +663,7 @@ class WatchListCreateView(APIView):
 
 class WatchlistDetailView(APIView):
 
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self, pk):
         try:
@@ -689,7 +689,7 @@ class WatchlistDetailView(APIView):
         #    return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def delete(self, request, pk, format=None):
-        if check_clientuser_group(request):
+        if check_user_group(request):
             watchlist = self.get_object(pk)
             watchlist.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -700,7 +700,7 @@ class WatchlistDetailView(APIView):
 
 # Register API
 class RegisterAPI(generics.GenericAPIView):
-    serializer_class = RegisterClientSerializer
+    # serializer_class = RegisterClientSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
