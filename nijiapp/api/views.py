@@ -1,4 +1,5 @@
 import re
+from django.db.models import query
 from rest_framework import status
 from django.db.models.base import ModelStateFieldsCacheDescriptor
 from django.db.models.manager import BaseManager
@@ -26,6 +27,9 @@ from .serializers import (ContactSerializer, GroupSerializer, PostSerializer, Pr
 
 from nijiapp.otp_helper import send_otp,verify_otp
 from rest_framework.permissions import AllowAny
+from rest_framework.generics import ListAPIView
+from rest_framework.filters import SearchFilter
+from rest_framework.pagination import PageNumberPagination
 
 @api_view(['GET'])
 # @permission_classes((AllowAny, ))
@@ -116,17 +120,29 @@ def check_mod_group(request):
         return True
     return False
 
-class PropertyListCreateView(APIView):
+class PropertyList(ListAPIView):
+    queryset = Properties.objects.all().order_by('id')
+    pagination_class = PageNumberPagination
+    pagination_class.page_size = 6
+
+    serializer_class = PropertiesSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['price', 'property', 'address',]
+    # search_fields = ['property_type']
+   
+
+
+class PropertyCreateView(APIView):
     # permission_classes = [permissions.IsAuthenticated]
     # permission_classes = [permissions.IsAdminUser]
    
-    def get(self, request):
-        property_list = Properties.objects.all().order_by('id')
-        page_number = self.request.query_params.get('page_number ', 1)
-        page_size = self.request.query_params.get('page_size ', 6)
-        paginator = Paginator(property_list , page_size)
-        serializer = PropertiesSerializer(paginator.page(page_number) , many=True, context={'request':self.request})
-        return Response(serializer.data)
+    # def get(self, request):
+    #     property_list = Properties.objects.all().order_by('id')
+    #     page_number = self.request.query_params.get('page_number ', 1)
+    #     page_size = self.request.query_params.get('page_size ', 6)
+    #     paginator = Paginator(property_list , page_size)
+    #     serializer = PropertiesSerializer(paginator.page(page_number) , many=True, context={'request':self.request})
+    #     return Response(serializer.data)
     
     def post(self, request, format=None):
         if check_agent_group(request) or check_editor_group(request): 
