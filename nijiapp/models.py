@@ -95,11 +95,13 @@ class Properties(models.Model):
     floors = models.IntegerField()
     builtup_area = models.CharField(max_length=100, null=True, blank=True)
     road_access = models.CharField(max_length=100, null=True, blank=True)
+    is_featured = models.BooleanField(default=False)
+    is_premium = models.BooleanField(default=False)
+
 
     # @property
     # def property_type_test(self):
     #     return self.property_type
-    
 
     def __str__(self):
         return self.title

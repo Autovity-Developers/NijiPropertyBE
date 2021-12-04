@@ -54,6 +54,8 @@ def api_list(request):
         # 'images_detail_update_retrive': '/api/api_list/images/<int:pk>/',
         'wathlist':'/api/api_list/watchlist',
         'watchlist_detail_update_retrive': '/api/api_list/watchlist/<int:pk>/',
+        'featured_properties': '/api/api_list/featured/',
+        'premium_properties': '/api/api_list/premuim/',
         # 'register': '/api/api_list/register/',
         # 'otp': '/api/api_list/otp/',
         
@@ -716,7 +718,7 @@ class WatchlistDetailView(APIView):
 
 # Register API
 class RegisterAPI(generics.GenericAPIView):
-    # serializer_class = RegisterClientSerializer
+    serializer_class = RegisterClientSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -801,12 +803,21 @@ class SendOTPView(APIView):
         otp_obj = OTPCode.objects.get(user=user)
         user_submitted_otp = request.POST.get('otp_code') 
         if otp_obj.code == user_submitted_otp:
-            # if UserOTP.objects.get(user="arjun").is_verified:
-            #     serializer = self.get_serializer(data=request.data)
-            #     serializer.is_valid(raise_exception=True)
-            #     user = serializer.save()
-
             return Response(data={'message':'User verified'}, status=status.HTTP_200_OK)
         return Response(data={'message':'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
 
-      
+class FeatureProperties(APIView):
+    
+    def get(self, request, fromat=None):
+        feature = Properties.objects.filter(is_featured=True)[:4] 
+        serializer = PropertiesSerializer(feature, many=True)
+        return Response(serializer.data)
+
+class PremiumProperties(APIView):
+
+    def get(self, request, format=None):
+        premium = Properties.objects.filter(is_premium=True)
+        serializer = PropertiesSerializer(premium, many=True)
+        return Response(serializer.data)
+
+

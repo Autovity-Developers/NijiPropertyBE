@@ -37,6 +37,8 @@ urlpatterns = [
     path('api_list/images/<int:pk>/', views.ImagesDetailView.as_view()),
     path('api_list/watchlist/', views.WatchListCreateView.as_view()),
     path('api_list/watchlist/<int:pk>/', views.WatchlistDetailView.as_view()),
+    path('api_list/featured/', views.FeatureProperties.as_view()),
+    path('api_list/premuim/', views.PremiumProperties.as_view()),
     
     path('api_list/register/', RegisterAPI.as_view(), name='register'),
     path('api_list/otp/', views.SendOTPView.as_view()),
