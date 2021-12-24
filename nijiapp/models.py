@@ -73,9 +73,21 @@ property_choices = {
     ('Buy', 'buy'),
     ('Rent', 'rent')
 }
+province = {
+    ('Province No. 1', 'province no 1'),
+    ('Province No. 2', 'province no 2'),
+    ('Bagmati Province', 'bagmati province'),
+    ('Gandaki Province', 'gandaki province'),
+    ('Lumbini Province', 'lumbini province'),
+    ('Karnali Province', 'karnali province'),
+    ('Sudurpashchim Province', 'sudurpashchim province'),
+}
 class Properties(models.Model):
     title = models.CharField(max_length=200, default='', null=True)
-    address = models.CharField(max_length=200, null=True)
+    # address = models.CharField(max_length=200, null=True)
+    city = models.CharField(max_length=200, null=True)
+    district = models.CharField(max_length=200, null=True)
+    province = models.CharField(max_length=200, choices=province)
     price = models.IntegerField(blank=True, null=True)
     # facilities = models.CharField(max_length=200, blank=True, null=True)#remove
     amenities = models.CharField(max_length=200, null=True, blank=True)
@@ -88,11 +100,11 @@ class Properties(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     thumbnail = models.ImageField(upload_to='Image_Gallery/thumbnail')
     descriptions = models.CharField(max_length=500, null=True, blank=True)
-    bedrooms = models.IntegerField()
-    bathroom = models.IntegerField()
+    bedrooms = models.IntegerField(blank=True, null=True)
+    bathroom = models.IntegerField(blank=True, null=True)
     parking = models.CharField(max_length=100, null=True, blank=True)
-    kitchen = models.IntegerField()
-    floors = models.IntegerField()
+    kitchen = models.IntegerField(blank=True, null=True)
+    floors = models.IntegerField(blank=True, null=True)
     builtup_area = models.CharField(max_length=100, null=True, blank=True)
     road_access = models.CharField(max_length=100, null=True, blank=True)
     is_featured = models.BooleanField(default=False)
