@@ -13,6 +13,8 @@ from .models import(
     NewsBlogs,
     ClientUser,
     OTPCode,
+    Card,
+    About,
 
 ) 
 # Register your models here.
@@ -30,4 +32,4 @@ admin.site.register(BankDetail)
 admin.site.register(ClientUser)
 admin.site.register(UserOTP)
 admin.site.register(OTPCode)
-admin.site.register([Watchlist, Images])
+admin.site.register([Watchlist, Images, Card, About])

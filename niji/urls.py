@@ -24,6 +24,8 @@ urlpatterns = [
     path('', include('nijiapp.urls')),
     path('admin/', include('nijiapp.users.urls')),
     path('api/', include('nijiapp.api.urls')),
+     path('ckeditor', include('ckeditor_uploader.urls')),
+
 ]
 
 

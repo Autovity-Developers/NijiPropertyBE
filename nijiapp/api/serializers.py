@@ -22,6 +22,8 @@ from nijiapp.models import(
     BankDetail,
     NewsBlogs,
     ClientUser,
+    Card,
+    About,
 
 )
 
@@ -142,24 +144,58 @@ class PropertyTypeSerializer(serializers.ModelSerializer):
 class PropertiesSerializer(serializers.ModelSerializer):
     # images =serializers.SerializerMethodField()
     user = serializers.ReadOnlyField(source='user.username')
-    images = ImagesSerializer(source='images_set', many=True, read_only=True)
+    # images = ImagesSerializer(source='images_set', many=True, read_only=True)
+    images = serializers.SerializerMethodField()
     # post = PostSerializer(source='post', many=)
 
     class Meta:
         model = Properties
-        fields = ['id', 'title', 'city', 'district', 'province', 'price', 'amenities', 'landmarks', 'map', 'property', 'user', 'thumbnail',
-                  'descriptions', 'bedrooms', 'bathroom', 'parking', 'kitchen', 'floors', 'builtup_area', 'road_access', 'property_type',
-                    'images']
-        
-        
+        fields = [
+            'id',
+            'title',
+            'city',
+            'district',
+            'province',
+            'price',
+            'amenities',
+            'landmarks',
+            'map',
+            'property',
+            'user',
+            'thumbnail',
+            'descriptions',
+            'bedrooms',
+            'bathroom',
+            'parking',
+            'kitchen',
+            'floors',
+            'builtup_area',
+            'road_access',
+            'property_type',
+            'images',
+            
+        ]
+
         def create(self, validated_data):
             images_data = self.context.get('view').request.FILES
-            property = Properties.objects.create(title=validated_data.get('title', 'no-title'),
-                                    user_id=1)
+            property = Properties.objects.create(title=validated_data.get('title', 'no-title'), user_id=1)
             for image_data in images_data.values():
                 Images.objects.create(property=property, image=image_data)
             return property
 
+    def get_images(self, property):
+        images_qs = Properties.images(property)
+        if images_qs.exists():
+            from django.contrib.sites.models import Site
+            from django.conf import settings
+
+            current_site = Site.objects.get_current()
+            # images = [image.image_url.url for image in images_qs]
+            full_images = [
+                'http://%s%s%s' % (current_site.domain, settings.MEDIA_URL, image.image_url) for image in images_qs
+            ]
+            return full_images
+        return []
 
 
 class MapSerializer(serializers.ModelSerializer):
@@ -207,3 +243,13 @@ class RegisterClientSerializer(serializers.ModelSerializer):
             validated_data['username'], validated_data['email'], validated_data['password'])
         # print(validated_data['position'])
         return user
+
+class CardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Card
+        fields = '__all__'
+
+class AboutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = About
+        fields = '__all__'

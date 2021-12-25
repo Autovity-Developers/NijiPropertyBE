@@ -8,7 +8,7 @@ from django.http import Http404
 from django.contrib.auth.models import Group, User
 from nijiapp.models import (BankDetail, Contact, Images, Map,
                             NewsBlogs, Post, Properties, PropertyType, UserOTP,
-                            Watchlist, OTPCode)
+                            Watchlist, OTPCode, Card, About)
 from rest_framework import (authentication, permissions, serializers, status,
                             viewsets, generics)
 from rest_framework.decorators import api_view
@@ -23,7 +23,7 @@ from django.core.mail import send_mail
 from .serializers import (ContactSerializer, GroupSerializer, PostSerializer, PropertiesSerializer,
                            PropertyTypeSerializer, UserSerializer, UserSerializerWithToken, MapSerializer, 
                            BankDetailSerializer, NewsBlogsSerializer, ImagesSerializer, WatchListSerializer,
-                           ClientUserSerializer, RegisterClientSerializer, )
+                           ClientUserSerializer, RegisterClientSerializer, CardSerializer, AboutSerializer)
 
 from nijiapp.otp_helper import send_otp,verify_otp
 from rest_framework.permissions import AllowAny
@@ -130,6 +130,10 @@ class PropertyList(ListAPIView):
 
     serializer_class = PropertiesSerializer
 
+    # def get(self, request):
+    #     properties = Properties.objects.all().order_by('id')
+    #     serializer = PropertiesSerializer(properties, context={'request':request})
+    #     return Response(serializer.data)
    
 
 class PropertyCreateView(APIView):
@@ -796,3 +800,115 @@ class PremiumProperties(APIView):
         return Response(serializer.data)
 
 
+
+class CardListCreateView(APIView):
+    # permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAdminUser]
+
+    def get(self, request, format=None):
+        card = Card.objects.all()
+        serializer = CardSerializer(card, many=True)
+        return Response(serializer.data)
+
+    
+    def post(self, request, format=None):
+        if check_agent_group(request) or check_editor_group(request):
+            serializer = CardSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+           return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+class CardDetailView(APIView):
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self, pk):
+        try:
+            return Card.objects.get(pk=pk)
+        except Card.DoesNotExist:
+            raise Http404
+    
+    def get(self, request, pk, format=None):
+        card = self.get_object(pk)
+        serializer = PostSerializer(card)
+        return Response(serializer.data)
+    
+    def put(self, request, pk, format=None):
+        if check_agent_group(request) or check_editor_group(request):
+            card = self.get_object(pk)
+            serializer = PostSerializer(card, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+           return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
+    def delete(self, request, pk, format=None):
+        if check_editor_group(request) or check_agent_group(request):
+            card = self.get_object(pk)
+            card.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+           return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
+
+
+class AboutListCreateView(APIView):
+    # permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAdminUser]
+
+    def get(self, request, format=None):
+        about = About.objects.all()
+        serializer = CardSerializer(about, many=True)
+        return Response(serializer.data)
+
+    
+    def post(self, request, format=None):
+        if check_agent_group(request) or check_editor_group(request):
+            serializer = AboutSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+           return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+class AboutDetailView(APIView):
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self, pk):
+        try:
+            return About.objects.get(pk=pk)
+        except About.DoesNotExist:
+            raise Http404
+    
+    def get(self, request, pk, format=None):
+        about = self.get_object(pk)
+        serializer = AboutSerializer(about)
+        return Response(serializer.data)
+    
+    def put(self, request, pk, format=None):
+        if check_agent_group(request) or check_editor_group(request):
+            about = self.get_object(pk)
+            serializer = AboutSerializer(about, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+           return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
+    def delete(self, request, pk, format=None):
+        if check_editor_group(request) or check_agent_group(request):
+            about = self.get_object(pk)
+            about.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+           return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)

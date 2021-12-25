@@ -38,10 +38,15 @@ urlpatterns = [
     path('api_list/watchlist/<int:pk>/', views.WatchlistDetailView.as_view()),
     path('api_list/featured/', views.FeatureProperties.as_view()),
     path('api_list/premuim/', views.PremiumProperties.as_view()),
-    
+    path('api_list/card/', views.CardListCreateView.as_view()),
+    path('api_list/card/<int:pk>/', views.CardDetailView.as_view()),
+    path('api_list/about/', views.AboutListCreateView.as_view()),
+    path('api_list/about/<int:pk>/', views.AboutDetailView.as_view()),
+
     path('api_list/register/', RegisterAPI.as_view(), name='register'),
     path('api_list/otp/', views.SendOTPView.as_view()),
     path('api_list/otp-verify/', views.VerifyOTPView.as_view()),
+
 ]
 
 # urlpatterns = format_suffix_patterns(urlpatterns)

@@ -7,6 +7,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import os
+# import django_heroku
 from pathlib import Path
 from datetime import timedelta
 
@@ -95,13 +96,49 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     'nijiapp',
     'rest_framework',
+    'ckeditor',
+    'ckeditor_uploader',
     # 'django_filters',
     # 'knox',
     # 'corsheaders',
 
 ]
+
+CKEDITOR_UPLOAD_PATH = 'uploads/'
+CKEDITOR_IMAGE_BACKEND = "pillow"
+
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': None,
+    },
+}
+
+
+SITE_ID = 1
+
+CKEDITOR_CONFIGS = {
+    'default': {
+        'tabSpaces': 4,
+        'toolbar': 'Custom',
+        'toolbar_Custom': [
+            # Font Style
+            ['Format','Bold', 'Styles', 'Font', 'FontSize', 'Italic', 'Underline', 'RemoveFormat', 'Blockquote'],
+            # Font color
+            ['TextColor', 'BGColor'],
+            # Link link
+            ['Link', 'Unlink'],
+            # List of items
+            ['NumberedList', 'BulletedList',"Indent", "Outdent", 'JustifyLeft', 'JustifyCenter',
+                  'JustifyRight', 'JustifyBlock'],
+            # Maximize
+            ["Subscript", "Superscript"], ['Undo', 'Redo'],'Table','Maximize'],  
+      
+
+         }
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -194,6 +231,9 @@ STATIC_ROOT = os.path.join(BASE_DIR,'static')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+#activate heroku to django
+# django_heroku.settings(locals())
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True

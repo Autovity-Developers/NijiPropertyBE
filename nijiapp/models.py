@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import Group, User
-import datetime 
+import datetime
+from ckeditor_uploader.fields import  RichTextUploadingField
+
+from django.db.models.aggregates import Max 
 # now = str(datetime.datetime)
 
 # Create your models here.
@@ -98,6 +101,7 @@ class Properties(models.Model):
     # category = models.ForeignKey(Categories, on_delete=models.CASCADE)
     # subcategory = models.ForeignKey(SubCategories, on_delete=models.CASCADE, null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user_email = models.EmailField(blank=True, null=True)
     thumbnail = models.ImageField(upload_to='Image_Gallery/thumbnail')
     descriptions = models.CharField(max_length=500, null=True, blank=True)
     bedrooms = models.IntegerField(blank=True, null=True)
@@ -110,10 +114,13 @@ class Properties(models.Model):
     is_featured = models.BooleanField(default=False)
     is_premium = models.BooleanField(default=False)
 
+    # def get_images(self, obj):
+    #     return obj.image_url_set.first().image.url
 
-    # @property
-    # def property_type_test(self):
-    #     return self.property_type
+    @classmethod
+    def images(cls, object=None):
+        if object:
+            return Images.objects.filter(property=object)
 
     def __str__(self):
         return self.title
@@ -193,7 +200,28 @@ class UserOTP(models.Model):
     def __str__(self):
         return self.user.username
 
+position = {
+    ('CEO', 'ceo'),
+    ('Manager', 'manager')
+}
+class Card(models.Model):
+    name = models.CharField(max_length=100, null=True,blank=True)
+    image =models.ImageField(upload_to='Image_Gallery/card')
+    position =models.CharField(max_length=100, choices=position)
+    description = RichTextUploadingField(blank=True, null=True)
 
+    def __str__(self):
+       return self.name
+
+class About(models.Model):
+    title = models.CharField(max_length=100, null=True, blank=True)
+    image = models.ImageField(upload_to='Image_Gallery/about_company')
+    description = RichTextUploadingField(blank=True, null=True)
+
+    def __str__(self):
+        return self.title
+
+        
 # class SubscribeUser(models.Model):
 #     username = models.CharField(max_length=100, null=True, blank=True)
 #     email = models.EmailField()
