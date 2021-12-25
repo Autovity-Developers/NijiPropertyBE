@@ -57,6 +57,10 @@ def api_list(request):
         'watchlist_detail_update_retrive': '/api/api_list/watchlist/<int:pk>/',
         'featured_properties': '/api/api_list/featured/',
         'premium_properties': '/api/api_list/premuim/',
+        'card':'/api/api_list/card/',
+        'card_details':'/api/api_list/card/<int:pk>',
+        'about':'/api/api_list/about/',
+        'about_details':'/api/api_list/about/<int:pk>',
         # 'register': '/api/api_list/register/',
         # 'otp': '/api/api_list/otp/',
         
