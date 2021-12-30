@@ -280,6 +280,11 @@ class PropertyTypeDetailView(APIView):
 class SearchView(APIView):
     def get(self, request):
         qs = Properties.objects.all()
+        title = request.GET.get('title')
+        if title:
+            qs = qs.filter(title__icontains=title)
+        print(self.kwargs)
+
         price = request.GET.get('price')
         if price:
             qs = qs.filter(price__icontains=price)
@@ -299,12 +304,12 @@ class SearchView(APIView):
         
         province = request.GET.get('province')
         if province:
-            qs = qs.fiter(province__icontains=province)
+            qs = qs.filter(province__icontains=province)
             
         property_type = request.GET.get('property_type')
         print(property_type)
         if property_type:
-            qs = qs.filter(property_type__title=property_type)
+            qs = qs.filter(property_type__property_type=property_type)
         queryset = qs
         # return queryset
         serializer =PropertiesSerializer(qs, many=True)

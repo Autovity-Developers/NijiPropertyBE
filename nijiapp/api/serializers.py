@@ -185,6 +185,7 @@ class PropertiesSerializer(serializers.ModelSerializer):
 
     def get_images(self, property):
         images_qs = Properties.images(property)
+        # thumb = Properties.objects.first()
         if images_qs.exists():
             from django.contrib.sites.models import Site
             from django.conf import settings
