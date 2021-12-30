@@ -162,6 +162,7 @@ class PropertiesSerializer(serializers.ModelSerializer):
             'map',
             'property',
             'user',
+            'user_email',
             'thumbnail',
             'descriptions',
             'bedrooms',

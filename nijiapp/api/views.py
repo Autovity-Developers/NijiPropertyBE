@@ -165,6 +165,7 @@ class PropertyCreateView(APIView):
                     property = req.get('property'),
                     property_type = property_type,
                     user = request.user,
+                    user_email = req.get('user_email'),
                     thumbnail = req.get('thumbnail'),
                     descriptions = req.get('descriptions'),
                     bedrooms = req.get('bedrooms'),
