@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import Group, User
 import datetime
 from ckeditor_uploader.fields import  RichTextUploadingField
-
+# from ckeditor.fields import RichTextField, RichTextUploadingField
 from django.db.models.aggregates import Max 
 # now = str(datetime.datetime)
 
@@ -40,13 +40,7 @@ class Contact(models.Model):
 #     def __str__(self):
 #         return self.username
 
-class Map(models.Model):
-    # property_title = models.CharField(max_length=100, blank=True, null=True)
-    longitude = models.DecimalField(max_digits=100, decimal_places=50)
-    latitude = models.DecimalField(max_digits=100, decimal_places=50)
 
-    # def __str__(self):
-    #     return self.property_title
 
 # class Categories(models.Model):
 #     title = models.CharField(max_length=200, blank=True, null=True)
@@ -62,14 +56,18 @@ class Map(models.Model):
 #         return self.title
 
 class PropertyType(models.Model):
-    property_type = models.CharField(max_length=100, primary_key=True)
+    icon_name = models.CharField(max_length=100, null=True, blank=True)
+    property_type = models.CharField(max_length=100, null=True, blank=True)
+    # property = models.ForeignKey(Properties, on_delete=models.CASCADE, related_name='ptype')
+    
+    # def __str__(self):
+    #     return self.property.title
 
     def __str__(self):
         return str(self.property_type)
     
     def __repr__(self):
         return self.property_type
-    
 
 
 property_choices = {
@@ -95,15 +93,14 @@ class Properties(models.Model):
     # facilities = models.CharField(max_length=200, blank=True, null=True)#remove
     amenities = models.CharField(max_length=200, null=True, blank=True)
     landmarks = models.CharField(max_length=200, null=True, blank=True)
-    map = models.ForeignKey(Map, on_delete=models.CASCADE)
+    # map = models.ForeignKey(Map, on_delete=models.CASCADE)
     property = models.CharField(max_length=100, choices=property_choices) 
     property_type = models.ForeignKey(PropertyType, on_delete=models.CASCADE)   
-    # category = models.ForeignKey(Categories, on_delete=models.CASCADE)
-    # subcategory = models.ForeignKey(SubCategories, on_delete=models.CASCADE, null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     user_email = models.EmailField(blank=True, null=True)
+    user_contact = models.CharField(max_length=100, null=True, blank=True)
     thumbnail = models.ImageField(upload_to='Image_Gallery/thumbnail')
-    descriptions = models.CharField(max_length=500, null=True, blank=True)
+    descriptions = RichTextUploadingField(blank=True, null=True)
     bedrooms = models.IntegerField(blank=True, null=True)
     bathroom = models.IntegerField(blank=True, null=True)
     parking = models.CharField(max_length=100, null=True, blank=True)
@@ -121,9 +118,39 @@ class Properties(models.Model):
     def images(cls, object=None):
         if object:
             return Images.objects.filter(property=object)
+    
+    @classmethod
+    def maps(cls, object=None):
+        if object:
+            return Map.objects.filter(property=object)
+
+     
+    # @classmethod
+    # def proptypes(cls, object=None):
+    #     if object:
+    #         return PropertyType.objects.filter(property=object)
+
+    # @property
+    # def get_status(self):
+    #     if len(self.maps.all())> 0:
+    #         return True
+    #     else:
+    #         return False
+    
 
     def __str__(self):
         return self.title
+
+    
+
+class Map(models.Model):
+    # property_title = models.CharField(max_length=100, blank=True, null=True)
+    longitude = models.DecimalField(max_digits=100, decimal_places=50)
+    latitude = models.DecimalField(max_digits=100, decimal_places=50)
+    property = models.ForeignKey(Properties, on_delete=models.CASCADE, related_name='maps')
+
+    def __str__(self):
+        return self.property.title
 
 
 class Post(models.Model):

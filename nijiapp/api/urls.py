@@ -19,6 +19,8 @@ urlpatterns = [
     path('api_list/properties/', views.PropertyList.as_view()),
     path('api_list/properties/create/', views.PropertyCreateView.as_view()),
     path('api_list/properties/<str:title>/', views.PropertyDetailView.as_view()),
+    path('api_list/featured/', views.FeatureProperties.as_view()),
+    path('api_list/premuim/', views.PremiumProperties.as_view()),
     path('api_list/property_type/', views.PropertyTypeListCreateView.as_view()),
     path('api_list/property_type/<str:type>/', views.PropertyTypeDetailView.as_view()),
     path('api_list/search/', views.SearchView.as_view()),
@@ -26,6 +28,7 @@ urlpatterns = [
     path('api_list/post/<int:pk>/', views.PostDetailView.as_view()),
     path('api_list/contact/', views.ContactListCreateView.as_view()),
     path('api_list/contact/<int:pk>/', views.ContactDetailView.as_view()),
+   
     path('api_list/map/', views.MapListCreateView.as_view()),
     path('api_list/map/<int:pk>/', views.MapDetailView.as_view()),
     path('api_list/bank/', views.BankListCreateView.as_view()),
@@ -36,8 +39,7 @@ urlpatterns = [
     path('api_list/images/<int:pk>/', views.ImagesDetailView.as_view()),
     path('api_list/watchlist/', views.WatchListCreateView.as_view()),
     path('api_list/watchlist/<int:pk>/', views.WatchlistDetailView.as_view()),
-    path('api_list/featured/', views.FeatureProperties.as_view()),
-    path('api_list/premuim/', views.PremiumProperties.as_view()),
+    
     path('api_list/card/', views.CardListCreateView.as_view()),
     path('api_list/card/<int:pk>/', views.CardDetailView.as_view()),
     path('api_list/about/', views.AboutListCreateView.as_view()),

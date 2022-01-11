@@ -7,6 +7,9 @@ from rest_framework import serializers, validators
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from django.contrib.sites.models import Site
+from django.conf import settings
+
 from nijiapp.models import(
     Contact,
     # User,
@@ -138,8 +141,12 @@ class PropertyTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = PropertyType
         # fields = ['id', 'foreign_key_field', 'type']
-        fields = ('property_type',)
+        fields = ('icon_name','property_type',)
 
+class MapSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Map
+        fields = ('longitude', 'latitude')
 
 class PropertiesSerializer(serializers.ModelSerializer):
     # images =serializers.SerializerMethodField()
@@ -147,7 +154,8 @@ class PropertiesSerializer(serializers.ModelSerializer):
     # images = ImagesSerializer(source='images_set', many=True, read_only=True)
     images = serializers.SerializerMethodField()
     # post = PostSerializer(source='post', many=)
-
+    maps = MapSerializer(many=True, read_only=True)
+    proptypes= PropertyTypeSerializer(many=True, read_only=True)
     class Meta:
         model = Properties
         fields = [
@@ -159,10 +167,13 @@ class PropertiesSerializer(serializers.ModelSerializer):
             'price',
             'amenities',
             'landmarks',
-            'map',
+            
+            'maps',
+            'proptypes',
             'property',
             'user',
             'user_email',
+            'user_contact',
             'thumbnail',
             'descriptions',
             'bedrooms',
@@ -172,7 +183,6 @@ class PropertiesSerializer(serializers.ModelSerializer):
             'floors',
             'builtup_area',
             'road_access',
-            'property_type',
             'images',
             
         ]
@@ -188,9 +198,6 @@ class PropertiesSerializer(serializers.ModelSerializer):
         images_qs = Properties.images(property)
         # thumb = Properties.objects.first()
         if images_qs.exists():
-            from django.contrib.sites.models import Site
-            from django.conf import settings
-
             current_site = Site.objects.get_current()
             # images = [image.image_url.url for image in images_qs]
             full_images = [
@@ -199,12 +206,16 @@ class PropertiesSerializer(serializers.ModelSerializer):
             return full_images
         return []
 
-
-class MapSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Map
-        fields = '__all__'
-
+    def get_maps(self, property):
+       maps_qs = Properties.maps(property)
+       serializer = MapSerializer(maps_qs, many=False)
+       return serializer.data
+      
+    def get_proptypes(self, property):
+       ptype_qs = Properties.proptypes(property)
+       serializer = PropertyTypeSerializer(ptype_qs, many=False)
+       return serializer.data
+      
 
 class BankDetailSerializer(serializers.ModelSerializer):
     class Meta:

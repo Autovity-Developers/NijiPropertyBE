@@ -3,7 +3,7 @@ from django.db.models import query
 from rest_framework import status
 from django.db.models.base import ModelStateFieldsCacheDescriptor
 from django.db.models.manager import BaseManager
-import rest_framework
+from rest_framework import viewsets
 from django.http import Http404
 from django.contrib.auth.models import Group, User
 from nijiapp.models import (BankDetail, Contact, Images, Map,
@@ -29,7 +29,7 @@ from nijiapp.otp_helper import send_otp,verify_otp
 from rest_framework.permissions import AllowAny
 from rest_framework.generics import ListAPIView
 from rest_framework.filters import SearchFilter
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
 # from django_filters.rest_framework import DjangoFilterBackend
 
 @api_view(['GET'])
@@ -166,6 +166,7 @@ class PropertyCreateView(APIView):
                     property_type = property_type,
                     user = request.user,
                     user_email = req.get('user_email'),
+                    user_contact = req.get('user_contact'),
                     thumbnail = req.get('thumbnail'),
                     descriptions = req.get('descriptions'),
                     bedrooms = req.get('bedrooms'),
@@ -278,9 +279,19 @@ class PropertyTypeDetailView(APIView):
         else:
            return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-class SearchView(APIView):
+# class PropertyList(ListAPIView):
+#     queryset = Properties.objects.all().order_by('id')
+#     pagination_class = PageNumberPagination
+#     pagination_class.page_size = 6
+
+#     serializer_class = PropertiesSerializer
+
+class SearchView(APIView,  LimitOffsetPagination):
+    
     def get(self, request):
         qs = Properties.objects.all()
+         
+        
         title = request.GET.get('title')
         if title:
             qs = qs.filter(title__icontains=title)
@@ -313,8 +324,9 @@ class SearchView(APIView):
             qs = qs.filter(property_type__property_type=property_type)
         queryset = qs
         # return queryset
-        serializer =PropertiesSerializer(qs, many=True)
-        return Response(serializer.data)
+        results = self.paginate_queryset(qs, request, view=self)
+        serializer =PropertiesSerializer(results, many=True)
+        return self.get_paginated_response(serializer.data)
 
 class PostListCreateView(APIView):
     # permission_classes = [permissions.IsAuthenticated]
@@ -374,7 +386,7 @@ class PostDetailView(APIView):
 
 class ContactListCreateView(APIView):
    
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, format=None):
         contact = Contact.objects.all()
@@ -426,9 +438,14 @@ class ContactDetailView(APIView):
            return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-class MapListCreateView(APIView):
+# class MapViewSet(viewsets.ModelViewSet):
+#     queryset = Map.objects.all()
+#     serializer_class = MapSerializer
 
-    permission_classes = [permissions.IsAuthenticated]
+class MapListCreateView(APIView):
+    # permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAdminUser]
+    # permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, format=None):
         map = Map.objects.all()
@@ -447,7 +464,7 @@ class MapListCreateView(APIView):
 
 class MapDetailView(APIView):
 
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self, pk):
         try:
@@ -795,20 +812,18 @@ class SendOTPView(APIView):
             return Response(data={'message':'User verified'}, status=status.HTTP_200_OK)
         return Response(data={'message':'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
 
-class FeatureProperties(APIView):
+class FeatureProperties(ListAPIView):
+    queryset = Properties.objects.filter(is_featured=True)[:4]
+    pagination_class = PageNumberPagination
+    pagination_class.page_size = 6
+    serializer_class = PropertiesSerializer
     
-    def get(self, request, fromat=None):
-        feature = Properties.objects.filter(is_featured=True)[:4] 
-        serializer = PropertiesSerializer(feature, many=True)
-        return Response(serializer.data)
-
-class PremiumProperties(APIView):
-
-    def get(self, request, format=None):
-        premium = Properties.objects.filter(is_premium=True)
-        serializer = PropertiesSerializer(premium, many=True)
-        return Response(serializer.data)
-
+    
+class PremiumProperties(ListAPIView):
+    queryset = Properties.objects.filter(is_premium=True)[:4]
+    pagination_class = PageNumberPagination
+    pagination_class.page_size = 6
+    serializer_class = PropertiesSerializer
 
 
 class CardListCreateView(APIView):
