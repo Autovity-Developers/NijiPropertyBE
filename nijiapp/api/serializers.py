@@ -135,13 +135,7 @@ class PostSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class PropertyTypeSerializer(serializers.ModelSerializer):
 
-    # foreign_key_field = PropertiesSerializer()
-    class Meta:
-        model = PropertyType
-        # fields = ['id', 'foreign_key_field', 'type']
-        fields = ('icon_name','property_type',)
 
 class MapSerializer(serializers.ModelSerializer):
     class Meta:
@@ -155,7 +149,7 @@ class PropertiesSerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField()
     # post = PostSerializer(source='post', many=)
     maps = MapSerializer(many=True, read_only=True)
-    proptypes= PropertyTypeSerializer(many=True, read_only=True)
+    # proptypes= PropertyTypeSerializer(many=True, read_only=True)
     class Meta:
         model = Properties
         fields = [
@@ -169,8 +163,8 @@ class PropertiesSerializer(serializers.ModelSerializer):
             'landmarks',
             
             'maps',
-            'proptypes',
             'property',
+            'property_type',
             'user',
             'user_email',
             'user_contact',
@@ -211,11 +205,27 @@ class PropertiesSerializer(serializers.ModelSerializer):
        serializer = MapSerializer(maps_qs, many=False)
        return serializer.data
       
-    def get_proptypes(self, property):
-       ptype_qs = Properties.proptypes(property)
-       serializer = PropertyTypeSerializer(ptype_qs, many=False)
-       return serializer.data
+    # def get_proptypes(self, property):
+    #    proptypes_qs = Properties.proptypes(property)
+    #    serializer = PropertyTypeSerializer(proptypes_qs, many=False)
+    #    return serializer.data
       
+class PropertyTypeSerializer(serializers.ModelSerializer):
+    properties_set = PropertiesSerializer(many=True)
+
+    class Meta:
+        model = PropertyType
+        fields = ('property_type', 'properties_set')
+
+class PropertyTypeDetailSerializer(serializers.ModelSerializer):
+    properties_set = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PropertyType
+        fields = ('title', 'properties_set')
+
+    def get_properties_set(self, object):
+        return PropertiesSerializer(Properties.objects.filter(property_type=object), many=True).data
 
 class BankDetailSerializer(serializers.ModelSerializer):
     class Meta:

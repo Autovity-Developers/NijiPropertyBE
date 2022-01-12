@@ -58,12 +58,8 @@ class Contact(models.Model):
 class PropertyType(models.Model):
     icon_name = models.CharField(max_length=100, null=True, blank=True)
     property_type = models.CharField(max_length=100, null=True, blank=True)
-    # property = models.ForeignKey(Properties, on_delete=models.CASCADE, related_name='ptype')
     
-    # def __str__(self):
-    #     return self.property.title
-
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.property_type)
     
     def __repr__(self):
@@ -125,10 +121,10 @@ class Properties(models.Model):
             return Map.objects.filter(property=object)
 
      
-    # @classmethod
-    # def proptypes(cls, object=None):
-    #     if object:
-    #         return PropertyType.objects.filter(property=object)
+    @classmethod
+    def proptypes(cls, object=None):
+        if object:
+            return PropertyType.objects.filter(property=object)
 
     # @property
     # def get_status(self):
@@ -140,6 +136,7 @@ class Properties(models.Model):
 
     def __str__(self):
         return self.title
+
 
     
 

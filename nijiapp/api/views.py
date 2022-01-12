@@ -21,7 +21,7 @@ from django.core.paginator import Paginator
 from django.core.mail import send_mail
 
 from .serializers import (ContactSerializer, GroupSerializer, PostSerializer, PropertiesSerializer,
-                           PropertyTypeSerializer, UserSerializer, UserSerializerWithToken, MapSerializer, 
+                           PropertyTypeSerializer, PropertyTypeDetailSerializer, UserSerializer, UserSerializerWithToken, MapSerializer, 
                            BankDetailSerializer, NewsBlogsSerializer, ImagesSerializer, WatchListSerializer,
                            ClientUserSerializer, RegisterClientSerializer, CardSerializer, AboutSerializer)
 
@@ -39,7 +39,7 @@ def api_list(request):
         'login': '/api/api_list/login',
         'properties': '/api/api_list/properties',
         'properties_detail_update_retrive': '/api/api_list/properties/<str:title>/',
-        # 'property_type': '/api/api_list/property_type',
+        'property_type': '/api/api_list/property_type',
         # 'property_type_detail_update_retrive': '/api/api_list/property_type/<str:title>/',
         # 'prop_subcategory': '/api/api_list/prop_subcategory',
         # 'prop_subcategory_detail_update_retrive': '/api/api_list/prop_subcategory/<int:pk>/',
@@ -228,10 +228,11 @@ class PropertyDetailView(APIView):
 class PropertyTypeListCreateView(APIView):
 
     # permission_classes = [permissions.IsAuthenticated]
+    serializer_class = PropertyTypeSerializer
 
     def get(self, request, format=None):
         prop_type = PropertyType.objects.all()
-        serializer = PropertyTypeSerializer(prop_type, many=True)
+        serializer = self.serializer_class(prop_type, many=True)
         return Response(serializer.data)
     
     def post(self, request, format=None):
@@ -248,6 +249,7 @@ class PropertyTypeListCreateView(APIView):
 class PropertyTypeDetailView(APIView):
 
     # permission_classes = [permissions.IsAuthenticated]
+    serializer_class = PropertyTypeDetailSerializer
 
     def get_object(self, type):
         try:
@@ -259,6 +261,12 @@ class PropertyTypeDetailView(APIView):
         prop_type = self.get_object(type)
         serializer = PropertyTypeSerializer(prop_type)
         return Response(serializer.data)
+   
+    # def get(self, request, *args, **kwargs):
+    #    type_obj = PropertyType.objects.get(id=kwargs.get('pk'))
+    #    serializer = self.serializer_class(type_obj, many=False)
+    #    return Response(serializer.data)
+
     
     def put(self, request, type, format=None):
         if check_agent_group(request) or check_editor_group(request):
@@ -279,12 +287,6 @@ class PropertyTypeDetailView(APIView):
         else:
            return Response({'error':True, 'message':'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-# class PropertyList(ListAPIView):
-#     queryset = Properties.objects.all().order_by('id')
-#     pagination_class = PageNumberPagination
-#     pagination_class.page_size = 6
-
-#     serializer_class = PropertiesSerializer
 
 class SearchView(APIView,  LimitOffsetPagination):
     
