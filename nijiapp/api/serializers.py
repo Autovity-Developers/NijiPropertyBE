@@ -195,7 +195,7 @@ class PropertiesSerializer(serializers.ModelSerializer):
             current_site = Site.objects.get_current()
             # images = [image.image_url.url for image in images_qs]
             full_images = [
-                'http://%s%s%s' % (current_site.domain, settings.MEDIA_URL, image.image_url) for image in images_qs
+                'https://%s%s%s' %(current_site.domain, settings.MEDIA_URL, image.image_url) for image in images_qs
             ]
             return full_images
         return []

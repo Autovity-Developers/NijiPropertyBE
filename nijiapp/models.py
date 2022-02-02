@@ -101,8 +101,11 @@ class Properties(models.Model):
     bathroom = models.IntegerField(blank=True, null=True)
     parking = models.CharField(max_length=100, null=True, blank=True)
     kitchen = models.IntegerField(blank=True, null=True)
-    floors = models.IntegerField(blank=True, null=True)
+    # floors = models.IntegerField(blank=True, null=True)
+
+    floors = models.DecimalField(max_digits=100, decimal_places=2)
     builtup_area = models.CharField(max_length=100, null=True, blank=True)
+    land_area = models.CharField(max_length=100, null=True, blank=True)
     road_access = models.CharField(max_length=100, null=True, blank=True)
     is_featured = models.BooleanField(default=False)
     is_premium = models.BooleanField(default=False)
